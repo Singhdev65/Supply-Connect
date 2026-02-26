@@ -1,9 +1,29 @@
 const mongoose = require("mongoose");
+const {
+  PRODUCT_CATEGORY_VALUES,
+  PRODUCT_SUBCATEGORY_VALUES,
+} = require("../config/productCatalog");
 
 const variantSchema = new mongoose.Schema({
+  author: String,
+  publisher: String,
+  language: String,
+  edition: String,
+  type: String,
+  packSize: String,
+  grade: String,
+  brand: String,
+  model: String,
+  ram: String,
+  storage: String,
+  material: String,
   color: String,
   size: String,
-  stock: Number,
+  ageGroup: String,
+  stock: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const productSchema = new mongoose.Schema(
@@ -20,6 +40,19 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
 
+    category: {
+      type: String,
+      enum: PRODUCT_CATEGORY_VALUES,
+      required: true,
+      default: "grocery-daily-essentials",
+    },
+
+    subcategory: {
+      type: String,
+      enum: PRODUCT_SUBCATEGORY_VALUES,
+      required: true,
+    },
+
     description: {
       type: String,
     },
@@ -34,12 +67,26 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
+    ratingAverage: {
+      type: Number,
+      default: 0,
+    },
+    ratingCount: {
+      type: Number,
+      default: 0,
+    },
+
     variants: [variantSchema],
 
     // ✅ MULTIPLE IMAGES (URLs from Cloudinary)
     images: {
       type: [String],
       required: true,
+    },
+
+    bannerImages: {
+      type: [String],
+      default: [],
     },
 
     isPublished: {

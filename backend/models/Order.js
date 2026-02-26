@@ -1,5 +1,25 @@
 const mongoose = require("mongoose");
 
+const shippingAddressSchema = new mongoose.Schema(
+  {
+    addressId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+    label: { type: String, default: "" },
+    recipientName: { type: String, required: true },
+    phone: { type: String, required: true },
+    line1: { type: String, required: true },
+    line2: { type: String, default: "" },
+    landmark: { type: String, default: "" },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true, default: "India" },
+  },
+  { _id: false },
+);
+
 const orderSchema = new mongoose.Schema(
   {
     buyer: {
@@ -24,6 +44,12 @@ const orderSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
+        name: {
+          type: String,
+        },
+        image: {
+          type: String,
+        },
         vendor: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
@@ -35,6 +61,16 @@ const orderSchema = new mongoose.Schema(
     totalAmount: {
       type: Number,
       required: true,
+    },
+    shippingAddress: {
+      type: shippingAddressSchema,
+      required: true,
+    },
+    deliveryNotes: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 300,
     },
 
     status: {
@@ -57,5 +93,9 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+orderSchema.index({ buyer: 1, createdAt: -1 });
+orderSchema.index({ "items.vendor": 1, createdAt: -1 });
+orderSchema.index({ status: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Order", orderSchema);

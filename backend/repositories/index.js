@@ -3,6 +3,8 @@ const productRepository = require("./product.repository");
 const orderRepository = require("./order.repository");
 const conversationRepository = require("./conversation.repository");
 const messageRepository = require("./message.repository");
+const paymentRepository = require("./payment.repository");
+const reviewRepository = require("./review.repository");
 
 module.exports = {
   userRepository,
@@ -10,4 +12,6 @@ module.exports = {
   orderRepository,
   conversationRepository,
   messageRepository,
+  paymentRepository,
+  reviewRepository,
 };

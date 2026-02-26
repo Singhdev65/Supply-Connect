@@ -1,5 +1,48 @@
 @import "tailwindcss";
 
+:root {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-soft: #dbeafe;
+  --color-accent: #14b8a6;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
+  --color-neutral-500: #6b7280;
+  --color-surface: #ffffff;
+  --color-background: #f9fafb;
+  --color-toast-background: #1f2937;
+  --color-toast-text: #f9fafb;
+  --scrollbar-thumb: #c5c7cb;
+  --scrollbar-thumb-hover: #aeb3ba;
+  --scrollbar-track: transparent;
+}
+
+/* WhatsApp-like thin scrollbar across app */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
 .hide-scrollbar {
   -ms-overflow-style: none; /* IE & Edge */
   scrollbar-width: none; /* Firefox */
@@ -10,17 +53,53 @@
 }
 
 .input {
-  @apply w-full p-3 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400;
+  @apply w-full mb-2 rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2;
+  --tw-ring-color: var(--color-primary);
 }
 
 .btn {
   @apply px-4 py-2 rounded-full font-semibold shadow hover:shadow-lg transition;
 }
 
+/* Chat animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes bounceDelay {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
 .dot {
   width: 6px;
   height: 6px;
-  background: #999;
+  background: var(--color-neutral-500);
   border-radius: 9999px;
   animation: bounce 1s infinite;
 }
@@ -47,7 +126,7 @@
 .typing-dot {
   width: 6px;
   height: 6px;
-  background: #999;
+  background: var(--color-neutral-500);
   border-radius: 50%;
   animation: bounce 1.2s infinite;
 }

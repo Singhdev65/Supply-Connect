@@ -4,13 +4,16 @@ const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/AppError");
 
 exports.placeOrder = asyncHandler(async (req, res) => {
-  const { items } = req.body;
+  const { items, addressId, deliveryNotes } = req.body;
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     throw new AppError("Order items are required", 400);
   }
+  if (!addressId) {
+    throw new AppError("Delivery address is required", 400);
+  }
 
-  const data = await orderService.placeOrder(items, req.user);
+  const data = await orderService.placeOrder({ items, addressId, deliveryNotes }, req.user);
 
   return success(res, "Order placed", data, 201);
 });
@@ -18,4 +21,18 @@ exports.placeOrder = asyncHandler(async (req, res) => {
 exports.getOrders = asyncHandler(async (req, res) => {
   const data = await orderService.getOrders(req.user);
   return success(res, "Orders fetched", data);
+});
+
+exports.getVendorSalesReport = asyncHandler(async (req, res) => {
+  const days = Number(req.query.days || 30);
+  const data = await orderService.getVendorSalesReport(req.user, { days });
+  return success(res, "Vendor sales report fetched", data);
+});
+
+exports.updateVendorOrderStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const data = await orderService.updateVendorOrderStatus(id, status, req.user);
+  return success(res, "Order status updated", data);
 });

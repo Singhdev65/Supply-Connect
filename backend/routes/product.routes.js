@@ -8,6 +8,8 @@ const { productController } = require("../controllers");
 const { product } = require("../validators");
 
 router.get("/", auth([]), productController.getProducts);
+router.get("/categories", auth([]), productController.getProductCategories);
+router.get("/:id", auth([]), productController.getProductById);
 
 router.post(
   "/",

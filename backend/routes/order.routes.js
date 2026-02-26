@@ -15,5 +15,12 @@ router.post(
 );
 
 router.get("/", auth(), orderController.getOrders);
+router.get("/vendor/report", auth(["vendor"]), orderController.getVendorSalesReport);
+router.patch(
+  "/:id/status",
+  auth(["vendor"]),
+  validate(order.updateOrderStatusSchema),
+  orderController.updateVendorOrderStatus,
+);
 
 module.exports = router;

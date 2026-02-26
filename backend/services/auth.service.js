@@ -40,6 +40,10 @@ function buildAuthResponse(user) {
       name: user.name,
       email: user.email,
       role: user.role,
+      phone: user.phone || "",
+      avatarUrl: user.avatarUrl || "",
+      bio: user.bio || "",
+      addresses: user.addresses || [],
     },
   };
 }

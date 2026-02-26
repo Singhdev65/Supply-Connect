@@ -1,19 +1,19 @@
-import { useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "@/shared/hooks";
+import { PATHS, USER_ROLES } from "@/utils/constants";
 
 const ProtectedRoute = ({ children, roles }) => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={PATHS.LOGIN} replace />;
   }
 
   if (roles && !roles.includes(user.role)) {
-    return user.role === "vendor" ? (
-      <Navigate to="/vendor" replace />
+    return user.role === USER_ROLES.VENDOR ? (
+      <Navigate to={PATHS.VENDOR_HOME} replace />
     ) : (
-      <Navigate to="/buyer" replace />
+      <Navigate to={PATHS.BUYER_HOME} replace />
     );
   }
 

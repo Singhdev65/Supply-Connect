@@ -4,8 +4,23 @@ const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/AppError");
 
 exports.getProducts = asyncHandler(async (req, res) => {
-  const data = await productService.getProducts(req.user);
+  const data = await productService.getProducts(req.user, req.query);
   return success(res, "Products fetched", data);
+});
+
+exports.getProductCategories = asyncHandler(async (_req, res) => {
+  const data = productService.getProductCategories();
+  return success(res, "Product categories fetched", data);
+});
+
+exports.getProductById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    throw new AppError("Product ID is required", 400);
+  }
+
+  const data = await productService.getProductById(id, req.user);
+  return success(res, "Product fetched", data);
 });
 
 exports.addProduct = asyncHandler(async (req, res) => {

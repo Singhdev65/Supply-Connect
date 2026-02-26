@@ -47,6 +47,13 @@ API.interceptors.response.use(
       if (status === 401) {
         message = "Session expired. Please login again.";
         localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("id");
+        if (window.location.pathname !== "/login") {
+          setTimeout(() => {
+            window.location.replace("/login");
+          }, 50);
+        }
       } else if (status === 403) {
         message = "You are not authorized to perform this action.";
       } else if (status === 404) {

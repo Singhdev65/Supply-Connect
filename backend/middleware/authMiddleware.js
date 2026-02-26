@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { hasRoleAccess } = require("../utils/authorization");
 
 const auth = (roles = []) => {
   return (req, res, next) => {
@@ -13,7 +14,7 @@ const auth = (roles = []) => {
         role: decoded.role,
       };
 
-      if (roles.length && !roles.includes(decoded.role)) {
+      if (!hasRoleAccess(decoded.role, roles)) {
         return res.status(403).json({ message: "Forbidden" });
       }
 

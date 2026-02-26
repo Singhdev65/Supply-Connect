@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+
+import path from "path";
+
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
@@ -12,6 +15,11 @@ export default {
           "100%": { opacity: 1, transform: "translateY(0)" },
         },
       },
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   plugins: [],
