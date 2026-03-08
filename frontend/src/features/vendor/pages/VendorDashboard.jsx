@@ -11,7 +11,7 @@ import {
 } from "../components";
 import { useVendorBoard } from "../hooks";
 
-const ITEM_HEIGHT = 380;
+const ITEM_HEIGHT = 420;
 
 const VendorDashboard = () => {
   const {

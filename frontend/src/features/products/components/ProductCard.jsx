@@ -74,7 +74,7 @@ const ProductCard = memo(
 
     return (
       <div
-        className={`h-[420px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-xl group ${
+        className={`h-full flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-xl group ${
           onOpenProduct ? "cursor-pointer" : ""
         }`}
         onClick={handleOpenProduct}
@@ -105,7 +105,7 @@ const ProductCard = memo(
           )}
         </div>
 
-        <div className="space-y-3 p-3">
+        <div className="flex flex-col flex-1 space-y-3 p-3">
           <h3 className="line-clamp-2 text-sm font-semibold text-gray-900">
             {product.name}
           </h3>
@@ -113,7 +113,7 @@ const ProductCard = memo(
             {product.description || "Premium quality product."}
           </p>
 
-          <div className="flex items-center justify-between pt-1">
+          <div className="mt-auto flex items-center justify-between pt-1">
             <span className="text-lg font-bold text-blue-600">
               Rs. {product.price}
             </span>
