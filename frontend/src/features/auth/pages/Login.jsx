@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { PATHS, USER_ROLES } from "@/utils/constants";
-import { loginApi } from "@/features/auth/api";
+import { PATHS, USER_ROLES, buildRoleHomePath } from "@/utils/constants";
+import { loginApi, socialLoginApi } from "@/features/auth/api";
 import { useAuthForm } from "@/features/auth/hooks";
 import { AuthField } from "@/features/auth/components";
 import { validateLoginForm } from "@/features/auth/utils/validators";
@@ -52,14 +52,37 @@ const Login = () => {
         }),
       );
       navigate(
-        res?.data?.user?.role === USER_ROLES.VENDOR
-          ? PATHS.VENDOR_HOME
-          : PATHS.BUYER_HOME,
+        buildRoleHomePath(res?.data?.user?.role),
       );
     } catch (err) {
       dispatch(loginFailure());
       console.error("Login failed", err);
       // alert("Invalid credentials. Please try again.");
+    }
+  };
+
+  const handleSocialLogin = async (provider) => {
+    dispatch(loginStart());
+    try {
+      const res = await socialLoginApi({
+        provider,
+        providerUserId: `${provider}-${Date.now()}`,
+        email: form.values.email || `${provider}.${Date.now()}@social.local`,
+        name: form.values.email?.split("@")?.[0] || `${provider} User`,
+        role: USER_ROLES.BUYER,
+      });
+      dispatch(
+        loginSuccess({
+          token: res?.data?.token,
+          user: res?.data?.user,
+        }),
+      );
+      navigate(
+        buildRoleHomePath(res?.data?.user?.role),
+      );
+    } catch (err) {
+      dispatch(loginFailure());
+      console.error("Social login failed", err);
     }
   };
 
@@ -91,20 +114,25 @@ const Login = () => {
             <h2 className="text-2xl font-bold text-gray-800">Sign In</h2>
             <p className="mt-1 text-sm text-gray-500 mb-8">Sign in to you account</p>
 
-            {/* Social Buttons (Hidden)
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <button className="flex items-center justify-center rounded-md bg-[#4285f4] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#3367d6] transition-colors shadow-sm">
+              <button
+                type="button"
+                onClick={() => handleSocialLogin("google")}
+                className="flex items-center justify-center rounded-md bg-[#4285f4] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#3367d6] transition-colors shadow-sm"
+              >
                 <GoogleIcon />
-                Sign in with Google
+                Google
               </button>
-              <button className="flex items-center justify-center rounded-md bg-[#3b5998] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#2d4373] transition-colors shadow-sm">
+              <button
+                type="button"
+                onClick={() => handleSocialLogin("facebook")}
+                className="flex items-center justify-center rounded-md bg-[#3b5998] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#2d4373] transition-colors shadow-sm"
+              >
                 <FacebookIcon />
-                Sign in with Facebook
+                Facebook
               </button>
             </div>
-            */}
 
-            {/* Divider (Hidden) 
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
@@ -113,7 +141,6 @@ const Login = () => {
                 <span className="bg-white px-3 text-xs text-gray-400 font-medium">Or Sign In with</span>
               </div>
             </div>
-            */}
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               

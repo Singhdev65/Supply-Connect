@@ -4,6 +4,8 @@ const TABS = [
   { id: "products", label: "Products" },
   { id: "orders", label: "Orders" },
   { id: "analytics", label: "Analytics" },
+  { id: "promotions", label: "Promotions" },
+  { id: "finance", label: "Finance" },
 ];
 
 const VendorBoardHeader = ({

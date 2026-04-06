@@ -6,6 +6,11 @@ const messageService = require("./message.service");
 const paymentService = require("./payment.service");
 const reviewService = require("./review.service");
 const userService = require("./user.service");
+const returnService = require("./return.service");
+const promotionService = require("./promotion.service");
+const financeService = require("./finance.service");
+const adminService = require("./admin.service");
+const activityLogService = require("./activityLog.service");
 
 module.exports = {
   authService,
@@ -16,4 +21,9 @@ module.exports = {
   paymentService,
   reviewService,
   userService,
+  returnService,
+  promotionService,
+  financeService,
+  adminService,
+  activityLogService,
 };

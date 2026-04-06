@@ -30,6 +30,8 @@ const ProductDetails = () => {
     removeFromCart,
     goBackToBoard,
     handleStartChat,
+    isWishlisted,
+    toggleWishlist,
     userRole,
     userId,
   } = useProductDetails();
@@ -66,6 +68,18 @@ const ProductDetails = () => {
           <ArrowLeft size={16} />
           Back to products
         </button>
+        {userRole === "buyer" ? (
+          <button
+            onClick={toggleWishlist}
+            className={`ml-2 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm shadow-sm ${
+              isWishlisted
+                ? "bg-pink-100 text-pink-700"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            {isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          </button>
+        ) : null}
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-5 lg:col-span-2">

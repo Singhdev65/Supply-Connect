@@ -6,8 +6,10 @@ import {
   AddProductWizardModal,
   VendorAnalyticsPanel,
   VendorBoardHeader,
+  VendorFinancePanel,
   VendorOrdersStats,
   VendorOrdersPanel,
+  VendorPromotionsPanel,
 } from "../components";
 import { useVendorBoard } from "../hooks";
 
@@ -22,10 +24,10 @@ const VendorDashboard = () => {
     showWizard,
     editingProduct,
     sortedProducts,
-    loading,
+    productsLoading,
     deleteProduct,
     orders,
-    loading: ordersLoading,
+    ordersLoading,
     orderStats,
     report,
     reportLoading,
@@ -37,6 +39,28 @@ const VendorDashboard = () => {
     openProductDetails,
     closeWizard,
     commitWizardSuccess,
+    promotions,
+    promotionsLoading,
+    promotionsSaving,
+    promotionForm,
+    setPromotionForm,
+    editingPromotionId,
+    startPromotionCreate,
+    startPromotionEdit,
+    savePromotion,
+    togglePromotion,
+    archivePromotion,
+    financeDays,
+    setFinanceDays,
+    financeSummary,
+    financeTransactions,
+    financePayouts,
+    financeTaxReport,
+    financeLoading,
+    payoutRequesting,
+    payoutAmount,
+    setPayoutAmount,
+    requestPayout,
   } = useVendorBoard();
 
   return (
@@ -64,7 +88,7 @@ const VendorDashboard = () => {
         )}
       </div>
 
-      {activeTab === "products" && !loading && (
+      {activeTab === "products" && !productsLoading && (
         <div className="h-[700px] px-4">
           <AutoSizer>
             {({ width, height }) => {
@@ -110,6 +134,49 @@ const VendorDashboard = () => {
             orders={orders}
             loading={ordersLoading}
             onStatusUpdate={updateOrderStatus}
+          />
+        </div>
+      )}
+      {activeTab === "products" && productsLoading && (
+        <div className="px-4 pb-8">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+            Loading products...
+          </div>
+        </div>
+      )}
+
+      {activeTab === "promotions" && (
+        <div className="px-4 pb-8">
+          <VendorPromotionsPanel
+            promotions={promotions}
+            loading={promotionsLoading}
+            form={promotionForm}
+            setForm={setPromotionForm}
+            saving={promotionsSaving}
+            editingId={editingPromotionId}
+            onSave={savePromotion}
+            onEdit={startPromotionEdit}
+            onToggle={togglePromotion}
+            onArchive={archivePromotion}
+            onResetForm={startPromotionCreate}
+          />
+        </div>
+      )}
+
+      {activeTab === "finance" && (
+        <div className="px-4 pb-8">
+          <VendorFinancePanel
+            days={financeDays}
+            setDays={setFinanceDays}
+            summary={financeSummary}
+            transactions={financeTransactions}
+            payouts={financePayouts}
+            taxReport={financeTaxReport}
+            loading={financeLoading}
+            requestAmount={payoutAmount}
+            setRequestAmount={setPayoutAmount}
+            requestPayout={requestPayout}
+            requesting={payoutRequesting}
           />
         </div>
       )}

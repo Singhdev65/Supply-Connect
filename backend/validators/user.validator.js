@@ -32,3 +32,15 @@ exports.createAddressSchema = addressSchema;
 exports.updateAddressSchema = addressSchema.keys({
   isDefault: Joi.boolean().optional(),
 });
+
+exports.updateSellerProfileSchema = Joi.object({
+  storeName: Joi.string().trim().min(2).max(120).required(),
+  storeDescription: Joi.string().trim().max(1000).allow("").optional(),
+  storeLogo: Joi.string().uri().allow("").optional(),
+  storeBanner: Joi.string().uri().allow("").optional(),
+  brandingColor: Joi.string().trim().max(20).allow("").optional(),
+  policies: Joi.string().trim().max(1500).allow("").optional(),
+  seoTitle: Joi.string().trim().max(160).allow("").optional(),
+  seoDescription: Joi.string().trim().max(320).allow("").optional(),
+  kycDocumentUrl: Joi.string().uri().allow("").optional(),
+});

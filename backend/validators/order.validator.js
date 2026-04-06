@@ -3,6 +3,7 @@ const Joi = require("joi");
 exports.placeOrderSchema = Joi.object({
   addressId: Joi.string().required(),
   deliveryNotes: Joi.string().trim().max(300).allow("").optional(),
+  couponCode: Joi.string().trim().uppercase().max(40).allow("").optional(),
   items: Joi.array()
     .items(
       Joi.object({
@@ -25,4 +26,8 @@ exports.updateOrderStatusSchema = Joi.object({
       "Cancelled",
     )
     .required(),
+});
+
+exports.cancelOrderSchema = Joi.object({
+  reason: Joi.string().trim().max(300).allow("").optional(),
 });

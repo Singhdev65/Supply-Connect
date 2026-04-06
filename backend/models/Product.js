@@ -93,8 +93,46 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    moderationStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved",
+    },
+
+    moderationNotes: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 500,
+    },
+
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+
+    tags: {
+      type: [String],
+      default: [],
+    },
+
+    searchKeywords: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true },
 );
+
+productSchema.index({ moderationStatus: 1, createdAt: -1 });
+productSchema.index({ tags: 1 });
+productSchema.index({ searchKeywords: 1 });
 
 module.exports = mongoose.model("Product", productSchema);

@@ -22,5 +22,17 @@ router.put(
 );
 router.delete("/me/addresses/:addressId", auth(), userController.deleteAddress);
 router.patch("/me/addresses/:addressId/default", auth(), userController.setDefaultAddress);
+router.get("/me/wishlist", auth(["buyer"]), userController.getWishlist);
+router.post("/me/wishlist/:productId", auth(["buyer"]), userController.addToWishlist);
+router.delete("/me/wishlist/:productId", auth(["buyer"]), userController.removeFromWishlist);
+router.get("/me/recently-viewed", auth(["buyer"]), userController.getRecentlyViewed);
+router.post("/me/recently-viewed/:productId", auth(["buyer"]), userController.markRecentlyViewed);
+router.get("/me/seller-profile", auth(["vendor"]), userController.getSellerProfile);
+router.put(
+  "/me/seller-profile",
+  auth(["vendor"]),
+  validate(user.updateSellerProfileSchema),
+  userController.updateSellerProfile,
+);
 
 module.exports = router;

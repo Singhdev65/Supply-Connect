@@ -5,6 +5,9 @@ const conversationRepository = require("./conversation.repository");
 const messageRepository = require("./message.repository");
 const paymentRepository = require("./payment.repository");
 const reviewRepository = require("./review.repository");
+const returnRepository = require("./return.repository");
+const promotionRepository = require("./promotion.repository");
+const payoutRepository = require("./payout.repository");
 
 module.exports = {
   userRepository,
@@ -14,4 +17,7 @@ module.exports = {
   messageRepository,
   paymentRepository,
   reviewRepository,
+  returnRepository,
+  promotionRepository,
+  payoutRepository,
 };

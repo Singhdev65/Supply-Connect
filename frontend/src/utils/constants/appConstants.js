@@ -16,6 +16,7 @@ export const PAYMENT_METHODS = {
 export const APP_TITLES = {
   BUYER_LAYOUT: "Supply Connect - Buyer",
   VENDOR_LAYOUT: "Supply Connect - Vendor",
+  ADMIN_LAYOUT: "Supply Connect - Admin",
   CHAT_LAYOUT: "Supply Connect - Chat",
 };
 

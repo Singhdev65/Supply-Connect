@@ -22,5 +22,13 @@ router.patch(
   validate(order.updateOrderStatusSchema),
   orderController.updateVendorOrderStatus,
 );
+router.patch(
+  "/:id/cancel",
+  auth(["buyer"]),
+  validate(order.cancelOrderSchema),
+  orderController.cancelBuyerOrder,
+);
+router.post("/:id/reorder", auth(["buyer"]), orderController.reorder);
+router.get("/:id/tracking", auth(["buyer", "vendor"]), orderController.getOrderTracking);
 
 module.exports = router;

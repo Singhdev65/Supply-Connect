@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { PRODUCT_SORT_OPTIONS, buildVendorProductDetailsPath } from "@/utils/constants";
 import useVendorOrders from "./useVendorOrders";
 import useVendorProducts from "./useVendorProducts";
+import useVendorPromotions from "./useVendorPromotions";
+import useVendorFinance from "./useVendorFinance";
 
 const useVendorBoard = () => {
   const navigate = useNavigate();
@@ -13,6 +15,8 @@ const useVendorBoard = () => {
 
   const productsState = useVendorProducts();
   const ordersState = useVendorOrders();
+  const promotionsState = useVendorPromotions();
+  const financeState = useVendorFinance();
 
   const sortedProducts = useMemo(() => {
     const list = [...productsState.products];
@@ -65,8 +69,41 @@ const useVendorBoard = () => {
     closeWizard,
     commitWizardSuccess,
     openProductDetails,
-    ...productsState,
-    ...ordersState,
+    products: productsState.products,
+    productsLoading: productsState.loading,
+    deleteProduct: productsState.deleteProduct,
+    addProductLocal: productsState.addProductLocal,
+    updateProductLocal: productsState.updateProductLocal,
+    orders: ordersState.orders,
+    ordersLoading: ordersState.loading,
+    orderStats: ordersState.orderStats,
+    report: ordersState.report,
+    reportLoading: ordersState.reportLoading,
+    reportDays: ordersState.reportDays,
+    setReportDays: ordersState.setReportDays,
+    updateOrderStatus: ordersState.updateOrderStatus,
+    promotions: promotionsState.promotions,
+    promotionsLoading: promotionsState.loading,
+    promotionsSaving: promotionsState.saving,
+    promotionForm: promotionsState.form,
+    setPromotionForm: promotionsState.setForm,
+    editingPromotionId: promotionsState.editingId,
+    startPromotionCreate: promotionsState.startCreate,
+    startPromotionEdit: promotionsState.startEdit,
+    savePromotion: promotionsState.savePromotion,
+    togglePromotion: promotionsState.togglePromotion,
+    archivePromotion: promotionsState.archivePromotion,
+    financeDays: financeState.days,
+    setFinanceDays: financeState.setDays,
+    financeSummary: financeState.summary,
+    financeTransactions: financeState.transactions,
+    financePayouts: financeState.payouts,
+    financeTaxReport: financeState.taxReport,
+    financeLoading: financeState.loading,
+    payoutRequesting: financeState.requesting,
+    payoutAmount: financeState.requestAmount,
+    setPayoutAmount: financeState.setRequestAmount,
+    requestPayout: financeState.requestPayout,
   };
 };
 

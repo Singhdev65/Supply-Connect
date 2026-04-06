@@ -4,6 +4,7 @@ const {
   reviewRepository,
   userRepository,
 } = require("../repositories");
+const promotionService = require("./promotion.service");
 const { USER_ROLES } = require("../config/roles");
 
 const VENDOR_UPDATABLE_STATUSES = [
@@ -18,8 +19,20 @@ const VENDOR_UPDATABLE_STATUSES = [
 const REVENUE_STATUSES = ["Delivered", "Completed"];
 const DEFAULT_PROFIT_MARGIN = Number(process.env.VENDOR_DEFAULT_PROFIT_MARGIN || 0.22);
 const MAX_REPORT_DAYS = 180;
+const BUYER_CANCELABLE_STATUSES = ["Pending Payment", "Paid", "Accepted by Vendor", "Packed"];
 
-exports.placeOrder = async ({ items, addressId, deliveryNotes }, user) => {
+const ORDER_STATUS_TIMELINE = [
+  "Pending Payment",
+  "Paid",
+  "Accepted by Vendor",
+  "Packed",
+  "Shipped",
+  "Out for Delivery",
+  "Delivered",
+  "Completed",
+];
+
+exports.placeOrder = async ({ items, addressId, deliveryNotes, couponCode }, user) => {
   if (!items?.length) throw { message: "Cart is empty", statusCode: 400 };
   if (!addressId) throw { message: "Delivery address is required", statusCode: 400 };
 
@@ -29,37 +42,84 @@ exports.placeOrder = async ({ items, addressId, deliveryNotes }, user) => {
   const address = buyer.addresses?.id(addressId);
   if (!address) throw { message: "Selected address not found", statusCode: 400 };
 
-  let totalAmount = 0;
-  let orderItems = [];
+  const resolvedItems = [];
 
   for (const item of items) {
     const product = await productRepository.findById(item.product);
     if (!product) throw { message: "Product not found", statusCode: 404 };
 
-    const qty = item.qty ?? item.quantity;
+    const qty = Number(item.qty ?? item.quantity ?? 0);
+    if (!Number.isFinite(qty) || qty < 1) {
+      throw { message: "Invalid quantity", statusCode: 400 };
+    }
 
-    if (product.stock < qty)
+    if (product.stock < qty) {
       throw { message: "Not enough stock", statusCode: 400 };
+    }
 
-    product.stock -= qty;
-    await productRepository.save(product);
-
-    totalAmount += product.price * qty;
-
-    orderItems.push({
-      product: product._id,
-      qty,
-      name: product.name,
-      image: product.images[0],
-      price: product.price,
-      vendor: product.vendor,
-    });
+    resolvedItems.push({ product, qty });
   }
 
-  return orderRepository.create({
+  const orderItems = resolvedItems.map(({ product, qty }) => ({
+    product: product._id,
+    qty,
+    name: product.name,
+    image: product.images[0],
+    price: product.price,
+    vendor: product.vendor,
+  }));
+
+  const lineItems = resolvedItems.map(({ product, qty }) => ({
+    productId: product._id,
+    vendor: product.vendor,
+    category: product.category,
+    qty,
+    price: Number(product.price || 0),
+    lineTotal: Number(product.price || 0) * qty,
+  }));
+
+  const subtotalAmount = Number(
+    lineItems.reduce((sum, item) => sum + item.lineTotal, 0).toFixed(2),
+  );
+
+  let discountAmount = 0;
+  let appliedPromotion = null;
+
+  if (couponCode) {
+    const promotionResolution = await promotionService.resolvePromotionForOrder({
+      couponCode,
+      lineItems,
+      buyerId: user.id,
+    });
+
+    if (promotionResolution) {
+      discountAmount = Number(promotionResolution.result.discountAmount || 0);
+      appliedPromotion = {
+        promotion: promotionResolution.promotion._id,
+        code: promotionResolution.result.code,
+        title: promotionResolution.result.title,
+        discountType: promotionResolution.result.discountType,
+        discountValue: promotionResolution.result.discountValue,
+        discountAmount: promotionResolution.result.discountAmount,
+        vendor: promotionResolution.result.vendor,
+      };
+    }
+  }
+
+  const totalAmount = Number(Math.max(subtotalAmount - discountAmount, 0).toFixed(2));
+
+  for (const { product, qty } of resolvedItems) {
+    product.stock -= qty;
+    await productRepository.save(product);
+  }
+
+  const created = await orderRepository.create({
     buyer: user.id,
     items: orderItems,
+    subtotalAmount,
+    discountAmount,
     totalAmount,
+    appliedPromotion,
     shippingAddress: {
       addressId: address._id,
       label: address.label || "",
@@ -76,6 +136,12 @@ exports.placeOrder = async ({ items, addressId, deliveryNotes }, user) => {
     deliveryNotes: deliveryNotes || "",
     status: "Pending Payment",
   });
+
+  if (appliedPromotion?.promotion) {
+    await promotionService.incrementUsage(appliedPromotion.promotion);
+  }
+
+  return created;
 };
 
 exports.getOrders = async (user) => {
@@ -198,5 +264,86 @@ exports.updateVendorOrderStatus = async (orderId, status, user) => {
     throw { message: "Unauthorized to update this order", statusCode: 403 };
   }
 
-  return orderRepository.update(orderId, { status });
+  const next = { status };
+  if (status === "Delivered" || status === "Completed") next.escrowStatus = "released";
+  if (status === "Cancelled") next.escrowStatus = "refunded";
+  return orderRepository.update(orderId, next);
+};
+
+exports.cancelBuyerOrder = async (orderId, user, reason = "") => {
+  const order = await orderRepository.findById(orderId);
+  if (!order) throw { message: "Order not found", statusCode: 404 };
+  if (String(order.buyer) !== String(user.id)) {
+    throw { message: "Unauthorized", statusCode: 403 };
+  }
+
+  if (!BUYER_CANCELABLE_STATUSES.includes(order.status)) {
+    throw { message: "Order can no longer be cancelled", statusCode: 400 };
+  }
+
+  if (order.status === "Cancelled") return order;
+
+  for (const item of order.items || []) {
+    const product = await productRepository.findById(item.product);
+    if (product) {
+      product.stock += Number(item.qty || 0);
+      await productRepository.save(product);
+    }
+  }
+
+  const note = reason ? `Cancelled by buyer: ${reason}` : "Cancelled by buyer";
+  return orderRepository.update(orderId, { status: "Cancelled", deliveryNotes: note, escrowStatus: "refunded" });
+};
+
+exports.reorder = async (orderId, user) => {
+  const order = await orderRepository.findByIdWithRelations(orderId);
+  if (!order) throw { message: "Order not found", statusCode: 404 };
+  if (String(order.buyer?._id || order.buyer) !== String(user.id)) {
+    throw { message: "Unauthorized", statusCode: 403 };
+  }
+
+  const items = (order.items || []).map((item) => ({
+    product: item.product?._id || item.product,
+    qty: Number(item.qty || 1),
+  }));
+
+  return exports.placeOrder(
+    {
+      items,
+      addressId: order.shippingAddress?.addressId,
+      deliveryNotes: `Reorder of ${order._id}`,
+    },
+    user,
+  );
+};
+
+exports.getOrderTracking = async (orderId, user) => {
+  const order = await orderRepository.findByIdWithRelations(orderId);
+  if (!order) throw { message: "Order not found", statusCode: 404 };
+
+  const isBuyer = String(order.buyer?._id || order.buyer) === String(user.id);
+  const isVendor = (order.items || []).some(
+    (item) => String(item.vendor) === String(user.id),
+  );
+
+  if (!isBuyer && !isVendor) {
+    throw { message: "Unauthorized", statusCode: 403 };
+  }
+
+  const activeIndex = ORDER_STATUS_TIMELINE.indexOf(order.status);
+  const timeline = ORDER_STATUS_TIMELINE.map((status, index) => ({
+    status,
+    done: activeIndex >= index,
+    active: status === order.status,
+  }));
+
+  return {
+    orderId: order._id,
+    status: order.status,
+    updatedAt: order.updatedAt,
+    estimatedDelivery: order.status === "Delivered" || order.status === "Completed"
+      ? order.updatedAt
+      : null,
+    timeline,
+  };
 };

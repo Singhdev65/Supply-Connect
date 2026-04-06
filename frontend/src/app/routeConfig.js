@@ -5,13 +5,19 @@ import { PATHS, PATH_SEGMENTS, USER_ROLES } from "@/utils/constants";
 const AuthLayout = lazy(() => import("@/layouts/AuthLayout"));
 const BuyerLayout = lazy(() => import("@/layouts/BuyerLayout"));
 const VendorLayout = lazy(() => import("@/layouts/VendorLayout"));
+const AdminLayout = lazy(() => import("@/layouts/AdminLayout"));
 const ChatLayout = lazy(() => import("@/layouts/ChatLayout"));
 
 const Login = lazy(() => import("@/features/auth/pages/Login"));
 const Signup = lazy(() => import("@/features/auth/pages/Signup"));
+const ForgotPassword = lazy(() => import("@/features/auth/pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/features/auth/pages/ResetPassword"));
 const BuyerDashboard = lazy(() => import("@/features/buyer/pages/BuyerDashboard"));
 const ProductDetails = lazy(() => import("@/features/products/pages/ProductDetails"));
+const WishlistPage = lazy(() => import("@/features/buyer/pages/WishlistPage"));
+const RecentlyViewedPage = lazy(() => import("@/features/buyer/pages/RecentlyViewedPage"));
 const VendorDashboard = lazy(() => import("@/features/vendor/pages/VendorDashboard"));
+const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"));
 const Chat = lazy(() => import("@/features/chat/pages/Chat"));
 const CheckoutPage = lazy(() => import("@/features/checkout/pages/index"));
 const PaymentPage = lazy(() => import("@/features/payment/pages/index"));
@@ -33,6 +39,14 @@ const vendorChildren = [
   {
     path: PATH_SEGMENTS.PROFILE,
     element: ProfilePage,
+  },
+  {
+    path: PATH_SEGMENTS.WISHLIST,
+    element: WishlistPage,
+  },
+  {
+    path: PATH_SEGMENTS.RECENTLY_VIEWED,
+    element: RecentlyViewedPage,
   },
   ...(featureFlags.chat
     ? [
@@ -119,6 +133,16 @@ export const routeConfig = [
         element: Signup,
         isPublic: true,
       },
+      {
+        path: PATH_SEGMENTS.FORGOT_PASSWORD,
+        element: ForgotPassword,
+        isPublic: true,
+      },
+      {
+        path: PATH_SEGMENTS.RESET_PASSWORD,
+        element: ResetPassword,
+        isPublic: true,
+      },
     ],
   },
   {
@@ -134,6 +158,18 @@ export const routeConfig = [
     isLayout: true,
     roles: [USER_ROLES.BUYER],
     children: buyerChildren,
+  },
+  {
+    path: PATHS.ADMIN_HOME,
+    element: AdminLayout,
+    isLayout: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.OPS_MANAGER, USER_ROLES.SUPPORT, USER_ROLES.FINANCE],
+    children: [
+      {
+        index: true,
+        element: AdminDashboard,
+      },
+    ],
   },
   ...(featureFlags.chat
     ? [

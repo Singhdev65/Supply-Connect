@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { PATHS, USER_ROLES } from "@/utils/constants";
-import { signupApi } from "@/features/auth/api";
+import { PATHS, USER_ROLES, buildRoleHomePath } from "@/utils/constants";
+import { signupApi, socialLoginApi } from "@/features/auth/api";
 import { loginStart, loginSuccess, loginFailure } from "@/features/auth/store/authSlice";
 import { useAuthForm } from "@/features/auth/hooks";
 import { validateSignupForm } from "@/features/auth/utils/validators";
@@ -50,10 +50,33 @@ const Signup = () => {
           user: res?.data?.user,
         }),
       );
-      navigate(form.values.role === USER_ROLES.VENDOR ? PATHS.VENDOR_HOME : PATHS.BUYER_HOME);
+      navigate(buildRoleHomePath(form.values.role));
     } catch (err) {
       dispatch(loginFailure());
       console.error("Signup failed", err);
+    }
+  };
+
+  const handleSocialSignup = async (provider) => {
+    dispatch(loginStart());
+    try {
+      const res = await socialLoginApi({
+        provider,
+        providerUserId: `${provider}-${Date.now()}`,
+        email: form.values.email || `${provider}.${Date.now()}@social.local`,
+        name: form.values.name || `${provider} User`,
+        role: form.values.role,
+      });
+      dispatch(
+        loginSuccess({
+          token: res?.data?.token,
+          user: res?.data?.user,
+        }),
+      );
+      navigate(buildRoleHomePath(form.values.role));
+    } catch (err) {
+      dispatch(loginFailure());
+      console.error("Social signup failed", err);
     }
   };
 
@@ -85,20 +108,25 @@ const Signup = () => {
             <h2 className="text-2xl font-bold text-gray-800">Sign Up</h2>
             <p className="mt-1 text-sm text-gray-500 mb-6">Create your account</p>
 
-            {/* Social Buttons (Hidden)
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <button className="flex items-center justify-center rounded-md bg-[#4285f4] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#3367d6] transition-colors shadow-sm">
+              <button
+                type="button"
+                onClick={() => handleSocialSignup("google")}
+                className="flex items-center justify-center rounded-md bg-[#4285f4] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#3367d6] transition-colors shadow-sm"
+              >
                 <GoogleIcon />
-                Sign in with Google
+                Google
               </button>
-              <button className="flex items-center justify-center rounded-md bg-[#3b5998] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#2d4373] transition-colors shadow-sm">
+              <button
+                type="button"
+                onClick={() => handleSocialSignup("facebook")}
+                className="flex items-center justify-center rounded-md bg-[#3b5998] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#2d4373] transition-colors shadow-sm"
+              >
                 <FacebookIcon />
-                Sign in with Facebook
+                Facebook
               </button>
             </div>
-            */}
 
-            {/* Divider (Hidden) 
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
@@ -107,7 +135,6 @@ const Signup = () => {
                 <span className="bg-white px-3 text-xs text-gray-400 font-medium">Or Sign Up with</span>
               </div>
             </div>
-            */}
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               

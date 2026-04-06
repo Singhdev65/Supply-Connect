@@ -18,12 +18,21 @@ exports.getProducts = async (user, query = {}) => {
   const requestedLimit = Number(query.limit || 0);
   const limit = requestedLimit > 0 ? Math.min(Math.max(requestedLimit, 1), 100) : 20;
   const usePagination = Number.isFinite(page) && page > 0 && Number.isFinite(limit) && limit > 0;
+  const filters = {
+    search: query.search ? String(query.search).trim() : "",
+    category: query.category ? String(query.category).trim() : "",
+    subcategory: query.subcategory ? String(query.subcategory).trim() : "",
+    minPrice: query.minPrice !== undefined ? Number(query.minPrice) : undefined,
+    maxPrice: query.maxPrice !== undefined ? Number(query.maxPrice) : undefined,
+    minRating: query.minRating !== undefined ? Number(query.minRating) : undefined,
+    sortBy: query.sortBy ? String(query.sortBy).trim() : "newest",
+  };
 
   if (!usePagination) {
     if (user?.role === "vendor")
       return productRepository.findVendorProducts(user.id);
 
-    return productRepository.findPublishedProducts();
+    return productRepository.findPublishedProducts(filters);
   }
 
   if (user?.role === "vendor") {
@@ -47,6 +56,7 @@ exports.getProducts = async (user, query = {}) => {
   const { data, total } = await productRepository.findPublishedProductsPaginated({
     page,
     limit,
+    ...filters,
   });
   const totalPages = Math.ceil(total / limit);
   return {
@@ -90,7 +100,9 @@ exports.addProduct = async (data, user) => {
     ...data,
     bannerImages: toValidBannerImages(data.images, data.bannerImages),
     vendor: user.id,
-    isPublished: true,
+    isPublished: false,
+    moderationStatus: "pending",
+    moderationNotes: "",
   });
 };
 
@@ -109,6 +121,9 @@ exports.updateProduct = async (id, data, user) => {
 
   Object.assign(product, data);
   product.bannerImages = toValidBannerImages(product.images, product.bannerImages);
+  product.moderationStatus = "pending";
+  product.moderationNotes = "";
+  product.isPublished = false;
   return productRepository.save(product);
 };
 

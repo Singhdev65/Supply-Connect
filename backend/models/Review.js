@@ -56,6 +56,22 @@ const reviewSchema = new mongoose.Schema(
       enum: ["none", "like", "love", "thanks"],
       default: "none",
     },
+    moderationStatus: {
+      type: String,
+      enum: ["visible", "hidden", "flagged"],
+      default: "visible",
+    },
+    moderationReason: {
+      type: String,
+      trim: true,
+      maxlength: 400,
+      default: "",
+    },
+    abuseReportCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true },
 );

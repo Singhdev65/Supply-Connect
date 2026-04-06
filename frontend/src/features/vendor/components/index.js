@@ -4,4 +4,6 @@ export { default as VendorBoardHeader } from "./VendorBoardHeader";
 export { default as VendorOrderCard } from "./VendorOrderCard";
 export { default as VendorOrdersStats } from "./VendorOrdersStats";
 export { default as VendorOrdersPanel } from "./VendorOrdersPanel";
+export { default as VendorPromotionsPanel } from "./VendorPromotionsPanel";
+export { default as VendorFinancePanel } from "./VendorFinancePanel";
 export * from "./steps";

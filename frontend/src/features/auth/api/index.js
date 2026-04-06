@@ -11,3 +11,17 @@ export const signupApi = async (payload) => {
   return data;
 };
 
+export const forgotPasswordApi = async (payload) => {
+  const { data } = await API.post(API_ENDPOINTS.AUTH_FORGOT_PASSWORD, payload);
+  return data;
+};
+
+export const resetPasswordApi = async (payload) => {
+  const { data } = await API.post(API_ENDPOINTS.AUTH_RESET_PASSWORD, payload);
+  return data;
+};
+
+export const socialLoginApi = async (payload) => {
+  const { data } = await API.post(API_ENDPOINTS.AUTH_SOCIAL_LOGIN, payload);
+  return data;
+};

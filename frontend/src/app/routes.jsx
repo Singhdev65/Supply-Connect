@@ -29,9 +29,14 @@ function createRoutes(routes) {
     if (route.redirect) {
       element = <Navigate to={route.redirect} replace />;
     }
-    // Handle layout routes
+    // Handle layout routes (optionally role protected)
     else if (route.isLayout) {
-      element = withSuspense(<Component />);
+      const layoutNode = withSuspense(<Component />);
+      if (route.roles) {
+        element = <ProtectedRoute roles={route.roles}>{layoutNode}</ProtectedRoute>;
+      } else {
+        element = layoutNode;
+      }
     }
     // Handle protected routes with specific roles
     else if (route.roles) {

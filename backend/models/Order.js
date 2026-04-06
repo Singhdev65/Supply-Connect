@@ -62,6 +62,33 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    subtotalAmount: {
+      type: Number,
+      default: 0,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
+    appliedPromotion: {
+      promotion: { type: mongoose.Schema.Types.ObjectId, ref: "Promotion", default: null },
+      code: { type: String, default: "" },
+      title: { type: String, default: "" },
+      discountType: { type: String, default: "" },
+      discountValue: { type: Number, default: 0 },
+      discountAmount: { type: Number, default: 0 },
+      vendor: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    },
+    escrowStatus: {
+      type: String,
+      enum: ["held", "released", "refunded"],
+      default: "held",
+    },
+    invoiceNo: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     shippingAddress: {
       type: shippingAddressSchema,
       required: true,

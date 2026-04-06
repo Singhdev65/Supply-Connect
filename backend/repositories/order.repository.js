@@ -5,6 +5,11 @@ exports.create = (data) => Order.create(data);
 
 exports.findById = (id) => Order.findById(id);
 
+exports.findByIdWithRelations = (id) =>
+  Order.findById(id)
+    .populate("buyer", "name email")
+    .populate("items.product", "name images vendor price category ratingAverage ratingCount");
+
 exports.findByBuyer = (buyerId) =>
   Order.find({ buyer: buyerId })
     .populate("items.product", "name images vendor price category ratingAverage ratingCount")
@@ -18,6 +23,15 @@ exports.findByVendor = (vendorId) =>
 
 exports.findAll = () =>
   Order.find()
+    .populate("items.product", "name images vendor price category ratingAverage ratingCount")
+    .sort({ createdAt: -1 });
+
+exports.findByVendorWithinRange = (vendorId, startDate, endDate) =>
+  Order.find({
+    "items.vendor": vendorId,
+    createdAt: { $gte: startDate, $lte: endDate },
+  })
+    .populate("buyer", "name email")
     .populate("items.product", "name images vendor price category ratingAverage ratingCount")
     .sort({ createdAt: -1 });
 
@@ -38,6 +52,15 @@ exports.existsBuyerPurchasedProduct = (buyerId, productId, statuses = []) => {
 
   return Order.exists(query);
 };
+
+exports.countByPromotion = (promotionId) =>
+  Order.countDocuments({ "appliedPromotion.promotion": promotionId });
+
+exports.countByPromotionAndBuyer = (promotionId, buyerId) =>
+  Order.countDocuments({
+    "appliedPromotion.promotion": promotionId,
+    buyer: buyerId,
+  });
 
 exports.aggregateVendorSalesByDay = (vendorId, startDate, endDate, statuses = []) => {
   const match = {

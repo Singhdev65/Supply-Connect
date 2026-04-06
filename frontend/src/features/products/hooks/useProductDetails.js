@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchProductByIdApi } from "@/features/products/api";
+import {
+  addToWishlistApi,
+  fetchWishlistApi,
+  markRecentlyViewedApi,
+  removeFromWishlistApi,
+} from "@/features/buyer/api";
 import { useCart } from "@/features/cart";
 import { useChat } from "@/features/chat";
 import { useAuth } from "@/shared/hooks";
@@ -34,6 +40,7 @@ const useProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState("");
   const [selectedOptions, setSelectedOptions] = useState({});
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -50,6 +57,10 @@ const useProductDetails = () => {
         const firstBanner = nextProduct?.bannerImages?.[0];
         const firstImage = nextProduct?.images?.[0];
         setActiveImage(firstBanner || firstImage || "");
+
+        if (user?.role === "buyer" && nextProduct?._id) {
+          markRecentlyViewedApi(nextProduct._id).catch(() => {});
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -59,7 +70,27 @@ const useProductDetails = () => {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, user?.role]);
+
+  useEffect(() => {
+    if (user?.role !== "buyer" || !product?._id) return;
+
+    let mounted = true;
+    const syncWishlist = async () => {
+      try {
+        const items = await fetchWishlistApi();
+        if (!mounted) return;
+        setIsWishlisted(items.some((entry) => String(entry._id) === String(product._id)));
+      } catch {
+        if (mounted) setIsWishlisted(false);
+      }
+    };
+
+    syncWishlist();
+    return () => {
+      mounted = false;
+    };
+  }, [product?._id, user?.role]);
 
   const variants = product?.variants || [];
 
@@ -135,6 +166,17 @@ const useProductDetails = () => {
     }
   }, [navigate, product?.vendor?._id, startChat]);
 
+  const toggleWishlist = useCallback(async () => {
+    if (!product?._id || user?.role !== "buyer") return;
+    if (isWishlisted) {
+      await removeFromWishlistApi(product._id);
+      setIsWishlisted(false);
+      return;
+    }
+    await addToWishlistApi(product._id);
+    setIsWishlisted(true);
+  }, [isWishlisted, product?._id, user?.role]);
+
   return {
     loading,
     product,
@@ -150,6 +192,8 @@ const useProductDetails = () => {
     removeFromCart,
     goBackToBoard,
     handleStartChat,
+    isWishlisted,
+    toggleWishlist,
     userRole: user?.role,
     userId: user?.id,
   };

@@ -17,4 +17,22 @@ router.post(
   authController.login,
 );
 
+router.post(
+  "/forgot-password",
+  validate(authValidator.forgotPasswordSchema),
+  authController.forgotPassword,
+);
+
+router.post(
+  "/reset-password",
+  validate(authValidator.resetPasswordSchema),
+  authController.resetPassword,
+);
+
+router.post(
+  "/social-login",
+  validate(authValidator.socialLoginSchema),
+  authController.socialLogin,
+);
+
 module.exports = router;

@@ -6,6 +6,10 @@ const messageController = require("./message.controller");
 const paymentController = require("./payment.controller");
 const reviewController = require("./review.controller");
 const userController = require("./user.controller");
+const returnController = require("./return.controller");
+const promotionController = require("./promotion.controller");
+const financeController = require("./finance.controller");
+const adminController = require("./admin.controller");
 
 module.exports = {
   authController,
@@ -16,4 +20,8 @@ module.exports = {
   paymentController,
   reviewController,
   userController,
+  returnController,
+  promotionController,
+  financeController,
+  adminController,
 };

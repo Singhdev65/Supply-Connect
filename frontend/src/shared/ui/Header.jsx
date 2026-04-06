@@ -1,8 +1,9 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { MessageCircle, LayoutDashboard, Package, LogOut, UserCircle2 } from "lucide-react";
 import { useContext } from "react";
 import { ChatContext } from "@/features/chat";
 import {
+  PATHS,
   USER_ROLES,
   buildRoleChatPath,
   buildRoleHomePath,
@@ -11,7 +12,13 @@ import {
 } from "@/utils/constants";
 
 const Header = ({ title, logout, role }) => {
+  const navigate = useNavigate();
   const { unreadCount } = useContext(ChatContext);
+
+  const handleLogout = () => {
+    logout?.();
+    navigate(PATHS.LOGIN, { replace: true });
+  };
 
   /* ================= NAV STYLE ================= */
   const navStyle = ({ isActive }) =>
@@ -86,7 +93,7 @@ const Header = ({ title, logout, role }) => {
         <div className="flex justify-end">
           {logout && (
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="
                 flex items-center gap-2
                 px-4 py-2 rounded-full

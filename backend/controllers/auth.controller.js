@@ -11,3 +11,18 @@ exports.login = asyncHandler(async (req, res) => {
   const data = await authService.login(req.body);
   return success(res, "Login successful", data);
 });
+
+exports.forgotPassword = asyncHandler(async (req, res) => {
+  const data = await authService.forgotPassword(req.body);
+  return success(res, "If the account exists, reset instructions have been generated", data);
+});
+
+exports.resetPassword = asyncHandler(async (req, res) => {
+  const data = await authService.resetPassword(req.body);
+  return success(res, "Password reset successful", data);
+});
+
+exports.socialLogin = asyncHandler(async (req, res) => {
+  const data = await authService.socialLogin(req.body);
+  return success(res, "Social login successful", data);
+});
